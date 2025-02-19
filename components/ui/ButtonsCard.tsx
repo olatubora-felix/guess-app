@@ -9,11 +9,11 @@ const ButtonsCard = ({
   onPressRight,
 }: ButtonsCardProps) => {
   return (
-    <View style={styles.buttonsContainer}>
-      <View style={styles.buttonContainer}>
+    <View style={ButtonStyles.buttonsContainer}>
+      <View style={ButtonStyles.buttonContainer}>
         <PrimaryButton onPress={onPressLeft}>{leftText}</PrimaryButton>
       </View>
-      <View style={styles.buttonContainer}>
+      <View style={ButtonStyles.buttonContainer}>
         <PrimaryButton onPress={onPressRight}>{rightText}</PrimaryButton>
       </View>
     </View>
@@ -29,7 +29,7 @@ interface ButtonsCardProps {
   onPressLeft: () => void;
 }
 
-const styles = StyleSheet.create({
+export const ButtonStyles = StyleSheet.create({
   buttonsContainer: {
     flexDirection: "row",
     alignItems: "center",

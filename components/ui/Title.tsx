@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import React, { FC, ReactNode } from "react";
 
 const Title: FC<TitleProps> = ({ children }) => {
@@ -11,10 +11,15 @@ const styles = StyleSheet.create({
     fontSize: 24,
     textAlign: "center",
     color: "white",
-    borderWidth: 2,
+    borderWidth: Platform.select({
+      ios: 0,
+      android: 2,
+    }),
     borderColor: "white",
     padding: 12,
     fontFamily: "open-sans-bold",
+    maxWidth: "80%",
+    width: 300,
   },
 });
 interface TitleProps {

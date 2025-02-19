@@ -1,72 +1,26 @@
-import { View, Text, StyleSheet, Alert, FlatList } from "react-native";
-import React, { useEffect, useState } from "react";
+import { View, StyleSheet, FlatList, useWindowDimensions } from "react-native";
+import React from "react";
 import Title from "../components/ui/Title";
 import NumberContainer from "../components/game/NumberContainer";
 import Card from "../components/ui/Card";
 import InstructionText from "../components/ui/InstructionText";
-import ButtonsCard from "../components/ui/ButtonsCard";
+import ButtonsCard, { ButtonStyles } from "../components/ui/ButtonsCard";
 import { FontAwesome6, FontAwesome5 } from "@expo/vector-icons";
 import GuessLogsItem from "../components/game/GuessLogsItem";
-function generateRandomBetween(min: number, max: number, exclude: number) {
-  const rndNum = Math.floor(Math.random() * (max - min)) + min;
+import useGameScreen from "../hooks/useGameScreen";
+import PrimaryButton from "../components/ui/PrimaryButton";
 
-  if (rndNum === exclude) {
-    return generateRandomBetween(min, max, exclude);
-  } else {
-    return rndNum;
-  }
-}
-
-let minBoundary = 1;
-let maxBoundary = 100;
 const GameScreen = ({ userNumber, onGameOver }: GameScreenProps) => {
-  const initialState = generateRandomBetween(1, 100, userNumber);
-  const [currentGuess, setCurrentGuess] = useState(initialState);
-  const [guessRounds, setGuessRounds] = useState([initialState]);
-  useEffect(() => {
-    if (currentGuess === userNumber) {
-      onGameOver(guessRounds.length);
-    }
-  }, [currentGuess, userNumber, onGameOver, guessRounds]);
-
-  useEffect(() => {
-    minBoundary = 1;
-    maxBoundary = 100;
-  }, []);
-
-  const handleNextGuestNumber = (direction: "lower" | "higher") => {
-    if (
-      (direction === "lower" && currentGuess < userNumber) ||
-      (direction === "higher" && currentGuess > userNumber)
-    ) {
-      Alert.alert("Don't Lie", "You know this is wrong...", [
-        {
-          text: "Sorry",
-          style: "cancel",
-        },
-      ]);
-      return;
-    }
-    if (direction === "lower") {
-      maxBoundary = currentGuess;
-    } else {
-      minBoundary = currentGuess + 1;
-    }
-    const newRndNumber = generateRandomBetween(
-      minBoundary,
-      maxBoundary,
-      currentGuess
-    );
-    setCurrentGuess(newRndNumber);
-    setGuessRounds((prevState) => [newRndNumber, ...prevState]);
-  };
-
-  const guessRoundsLength = guessRounds.length;
-  return (
-    <View style={styles.screen}>
-      <Title>Opponent's Guess</Title>
+  const {
+    currentGuess,
+    guessRounds,
+    handleNextGuestNumber,
+    guessRoundsLength,
+  } = useGameScreen(userNumber, onGameOver);
+  const { width, height } = useWindowDimensions();
+  let content = (
+    <>
       <NumberContainer>{currentGuess}</NumberContainer>
-
       <Card>
         <InstructionText style={styles.instructionText}>
           Higer or Lower
@@ -78,7 +32,32 @@ const GameScreen = ({ userNumber, onGameOver }: GameScreenProps) => {
           onPressRight={() => handleNextGuestNumber("higher")}
         />
       </Card>
+    </>
+  );
 
+  if (width > 500) {
+    content = (
+      <>
+        <View style={styles.buttonContainerWide}>
+          <View style={ButtonStyles.buttonContainer}>
+            <PrimaryButton onPress={() => handleNextGuestNumber("lower")}>
+              <FontAwesome6 name="minus" size={24} Colors="white" />
+            </PrimaryButton>
+          </View>
+          <NumberContainer>{currentGuess}</NumberContainer>
+          <View style={ButtonStyles.buttonContainer}>
+            <PrimaryButton onPress={() => handleNextGuestNumber("higher")}>
+              <FontAwesome5 name="plus" size={24} Colors="white" />
+            </PrimaryButton>
+          </View>
+        </View>
+      </>
+    );
+  }
+  return (
+    <View style={styles.screen}>
+      <Title>Opponent's Guess</Title>
+      {content}
       <View style={styles.listContainer}>
         <FlatList
           data={guessRounds}
@@ -100,6 +79,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     padding: 24,
+    alignItems: "center",
   },
   instructionText: {
     marginBottom: 12,
@@ -107,6 +87,11 @@ const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
     padding: 16,
+  },
+  buttonContainerWide: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 interface GameScreenProps {
